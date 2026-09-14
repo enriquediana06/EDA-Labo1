@@ -65,6 +65,6 @@ public class Pelicula {
 
     @Override
     public String toString() {
-        return "Pelicula{id='" + id + "', titulo='" + titulo + "', año=" + anioEstreno + "}";
+        return "Pelicula{id='" + id + "', titulo='" + titulo + "', anio=" + anioEstreno + "}";
     }
 }

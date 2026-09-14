@@ -13,7 +13,6 @@ public class Actor implements Comparable<Actor> {
         this.peliculas = new HashSet<>();
     }
 
-    // --- GETTERS ---
     public String getId() {
         return id;
     }
@@ -26,7 +25,6 @@ public class Actor implements Comparable<Actor> {
         return peliculas;
     }
 
-    // --- MÉTODOS DE RELACIÓN ---
     public void addPelicula(Pelicula p) {
         if (p != null) {
             this.peliculas.add(p);
@@ -39,8 +37,6 @@ public class Actor implements Comparable<Actor> {
         }
     }
 
-    // --- MÉTODOS EQUALS Y HASHCODE (según los apuntes de Tablas Hash) ---
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -48,18 +44,14 @@ public class Actor implements Comparable<Actor> {
         return Objects.equals(id, actor.id);
     }
 
-    @Override
     public int hashCode() {
         return Objects.hash(id);
     }
 
-    // --- ORDENACIÓN (para cumplir el requisito de devolver lista ordenada) ---
-    @Override
     public int compareTo(Actor o) {
         return this.nombre.compareToIgnoreCase(o.nombre);
     }
 
-    @Override
     public String toString() {
         return "Actor{id='" + id + "', nombre='" + nombre + "'}";
     }
