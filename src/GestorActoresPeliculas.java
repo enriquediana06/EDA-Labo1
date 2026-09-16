@@ -2,6 +2,9 @@ import java.util.HashMap;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 public class GestorActoresPeliculas {
 
     private HashMap<String, Actor> actores;
@@ -91,36 +94,47 @@ public class GestorActoresPeliculas {
     	    e.printStackTrace();
     	}
     }
+    
+    public List<Actor> obtenerActoresOrdenados() {
+        List<Actor> lista = new ArrayList<>(actores.values()); //una copia pa no modificar la original
+
+        Collections.sort(lista); //ordenamos la copia
+
+        return lista;
+    }
 
     public static void main(String[] args) {
-       
+
         GestorActoresPeliculas gestor = new GestorActoresPeliculas();
-     
+
         Actor actor1 = new Actor("Q123", "Brad Pitt");
         gestor.insertarActor(actor1);
+
+        Actor encontrado = gestor.buscarActor("Q123");
+        System.out.println(encontrado);
 
         Pelicula pelicula1 = new Pelicula("P001", "Seven", 1995);
         gestor.insertarPelicula(pelicula1);
 
         gestor.relacionarActorPelicula("Q123", "P001");
 
-        System.out.println(actor1.getPeliculas());
-        System.out.println(gestor.obtenerActoresPelicula("P001"));
         System.out.println(gestor.obtenerPeliculasActor("Q123"));
-        
-        Actor encontrado = gestor.buscarActor("Q123");
-        System.out.println(encontrado);
+
+        System.out.println(gestor.obtenerActoresPelicula("P001"));
 
         gestor.modificarAnioPelicula("P001", 1996);
-
         System.out.println(pelicula1);
+
         gestor.guardarEnFichero("actores.txt");
+
+        System.out.println(gestor.obtenerActoresOrdenados());
+
         gestor.borrarActor("Q123");
 
         System.out.println(gestor.buscarActor("Q123"));
         System.out.println(pelicula1.getActores());
-        
+    }
        
       
     }
-}
+
