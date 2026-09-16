@@ -1,6 +1,7 @@
 import java.util.HashMap;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
 import java.util.Set;
-
 public class GestorActoresPeliculas {
 
     private HashMap<String, Actor> actores;
@@ -78,6 +79,18 @@ public class GestorActoresPeliculas {
             actores.remove(idActor);
         }
     }
+    public void guardarEnFichero(String nombreFichero) {
+    	try {
+    	    PrintWriter escritor = new PrintWriter(nombreFichero);
+
+    	    for (Actor actor : actores.values()) {
+    	        escritor.println(actor);
+    	    }
+    	    escritor.close();
+    	} catch (FileNotFoundException e) {
+    	    e.printStackTrace();
+    	}
+    }
 
     public static void main(String[] args) {
        
@@ -101,12 +114,13 @@ public class GestorActoresPeliculas {
         gestor.modificarAnioPelicula("P001", 1996);
 
         System.out.println(pelicula1);
-        
+        gestor.guardarEnFichero("actores.txt");
         gestor.borrarActor("Q123");
 
         System.out.println(gestor.buscarActor("Q123"));
         System.out.println(pelicula1.getActores());
         
+       
       
     }
 }
