@@ -1,10 +1,12 @@
 import java.util.HashMap;
+import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.io.File;
 public class GestorActoresPeliculas {
 
     private HashMap<String, Actor> actores;
@@ -59,6 +61,17 @@ public class GestorActoresPeliculas {
 
         return null;
     }
+    
+    public int obtenerAnioPelicula(String idPelicula) {
+
+        Pelicula pelicula = peliculas.get(idPelicula);
+
+        if (pelicula != null) {
+            return pelicula.getAnioEstreno();
+        }
+
+        return -1;
+    }
 
     public void modificarAnioPelicula(String idPelicula, int nuevoAnio) {
 
@@ -102,39 +115,138 @@ public class GestorActoresPeliculas {
 
         return lista;
     }
+    public void cargarDatos(String nombreCarpeta) {
 
+    	
+
+    	    File carpeta = new File(nombreCarpeta);
+
+    	    File[] archivos = carpeta.listFiles();
+
+    	    if (archivos == null) {
+    	        System.out.println("No se ha encontrado la carpeta");
+    	        return;
+    	    }
+
+    	    for (File archivo : archivos) {
+
+    	        if (archivo.isFile() && archivo.getName().endsWith(".txt")) {
+
+    	            try {
+
+    	                Scanner lector = new Scanner(archivo);
+
+    	                String nombreArchivo = archivo.getName();
+
+    	                int anio = Integer.parseInt(
+    	                    nombreArchivo.substring(17, 21)
+    	                );
+
+    	                while (lector.hasNextLine()) {
+
+    	                    String linea = lector.nextLine();
+
+    	                    String[] datos = linea.split("\\s+###\\s+");
+
+    	                    if (datos.length == 4) {
+
+    	                        String idActor = datos[1];
+    	                        String idPelicula = datos[2];
+    	                        String titulo = datos[3];
+
+    	                        // Creamos el actor si no existe
+    	                        if (!actores.containsKey(idActor)) {
+
+    	                            Actor actor = new Actor(idActor, "");
+
+    	                            insertarActor(actor);
+    	                        }
+
+    	                        // Creamos la película si no existe
+    	                        if (!peliculas.containsKey(idPelicula)) {
+
+    	                            Pelicula pelicula = new Pelicula(
+    	                                idPelicula,
+    	                                titulo,
+    	                                anio
+    	                            );
+
+    	                            insertarPelicula(pelicula);
+    	                        }
+
+    	                        // Relacionamos el actor con la película
+    	                        relacionarActorPelicula(
+    	                            idActor,
+    	                            idPelicula
+    	                        );
+    	                    }
+    	                }
+
+    	                lector.close();
+
+    	            } catch (FileNotFoundException e) {
+
+    	                e.printStackTrace();
+    	            }
+    	        }
+    	    }
+
+    	    System.out.println("Actores cargados: " + actores.size());
+
+    	    System.out.println("Películas cargadas: " + peliculas.size());
+    	}
+    
     public static void main(String[] args) {
 
         GestorActoresPeliculas gestor = new GestorActoresPeliculas();
 
-        Actor actor1 = new Actor("Q123", "Brad Pitt");
-        gestor.insertarActor(actor1);
+        System.out.println("Comenzando carga de datos...");
 
-        Actor encontrado = gestor.buscarActor("Q123");
-        System.out.println(encontrado);
+        gestor.cargarDatos("datos");
 
-        Pelicula pelicula1 = new Pelicula("P001", "Seven", 1995);
-        gestor.insertarPelicula(pelicula1);
+        // buscar un actor
+        Actor actor = gestor.buscarActor("Q101080945");
 
-        gestor.relacionarActorPelicula("Q123", "P001");
+        System.out.println("Actor encontrado: " + actor);
 
-        System.out.println(gestor.obtenerPeliculasActor("Q123"));
+        System.out.println("Películas del actor: "
+                + gestor.obtenerPeliculasActor("Q101080945").size());
 
-        System.out.println(gestor.obtenerActoresPelicula("P001"));
+        // buscar los actores de una película
+        String idPelicula = "http://www.wikidata.org/entity/Q12047846";
 
-        gestor.modificarAnioPelicula("P001", 1996);
-        System.out.println(pelicula1);
+        System.out.println("Actores de la película: "
+                + gestor.obtenerActoresPelicula(idPelicula).size());
+        
+     // modificamoss el año de estreno
+        System.out.println("Año original: "
+                + gestor.peliculas.get(idPelicula).getAnioEstreno());
 
-        gestor.guardarEnFichero("actores.txt");
+        gestor.modificarAnioPelicula(idPelicula, 2025);
 
-        System.out.println(gestor.obtenerActoresOrdenados());
+        System.out.println("Año modificado: "
+                + gestor.peliculas.get(idPelicula).getAnioEstreno());
+        
+     // para borrar un actor
+        gestor.borrarActor("Q101080945");
 
-        gestor.borrarActor("Q123");
+        System.out.println("Actor después de borrar: "
+                + gestor.buscarActor("Q101080945"));
 
-        System.out.println(gestor.buscarActor("Q123"));
-        System.out.println(pelicula1.getActores());
+        System.out.println("Actores de la película después de borrar: "
+                + gestor.obtenerActoresPelicula(idPelicula).size());
+
+        System.out.println("Carga terminada.");
+     // guauardar actores en un fichero
+        gestor.guardarEnFichero("actores_guardados.txt");
+
+        System.out.println("Actores guardados correctamente.");
+     //  actores ordenados
+        System.out.println("Primeros actores ordenados:");
+
+        for (Actor a : gestor.obtenerActoresOrdenados().subList(0, 10)) {
+            System.out.println(a);
+        }
     }
-       
-      
-    }
+}
 

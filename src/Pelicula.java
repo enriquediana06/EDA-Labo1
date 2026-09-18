@@ -15,7 +15,6 @@ public class Pelicula {
         this.actores = new HashSet<>();
     }
 
-    // --- GETTERS Y SETTERS ---
     public String getId() {
         return id;
     }
