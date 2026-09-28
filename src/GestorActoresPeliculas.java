@@ -117,84 +117,87 @@ public class GestorActoresPeliculas {
     }
     public void cargarDatos(String nombreCarpeta) {
 
-    	
+        File carpeta = new File(nombreCarpeta);
 
-    	    File carpeta = new File(nombreCarpeta);
+        File[] archivos = carpeta.listFiles();
 
-    	    File[] archivos = carpeta.listFiles();
+        if (archivos == null) {
+            System.out.println("No se ha encontrado la carpeta");
+            return;
+        }
 
-    	    if (archivos == null) {
-    	        System.out.println("No se ha encontrado la carpeta");
-    	        return;
-    	    }
+        for (File archivo : archivos) {
 
-    	    for (File archivo : archivos) {
+            if (archivo.isFile() && archivo.getName().endsWith(".txt")) {
 
-    	        if (archivo.isFile() && archivo.getName().endsWith(".txt")) {
+                try {
 
-    	            try {
+                    Scanner lector = new Scanner(archivo);
 
-    	                Scanner lector = new Scanner(archivo);
+                    String nombreArchivo = archivo.getName();
 
-    	                String nombreArchivo = archivo.getName();
+                    int anio = Integer.parseInt(
+                        nombreArchivo.substring(17, 21)
+                    );
 
-    	                int anio = Integer.parseInt(
-    	                    nombreArchivo.substring(17, 21)
-    	                );
+                    while (lector.hasNextLine()) {
 
-    	                while (lector.hasNextLine()) {
+                        String linea = lector.nextLine();
 
-    	                    String linea = lector.nextLine();
+                        String[] datos = linea.split("\\s+###\\s+");
 
-    	                    String[] datos = linea.split("\\s+###\\s+");
+                        if (datos.length == 4) {
 
-    	                    if (datos.length == 4) {
+                            // CAMBIO: el id del actor es datos[0] (antes datos[1])
+                            String idActor = datos[0];
+                            // NUEVO: el nombre del actor es datos[1]
+                            String nombreActor = datos[1];
+                            String idPelicula = datos[2];
+                            String titulo = datos[3];
 
-    	                        String idActor = datos[1];
-    	                        String idPelicula = datos[2];
-    	                        String titulo = datos[3];
+                            // Creamos el actor si no existe
+                            if (!actores.containsKey(idActor)) {
 
-    	                        // Creamos el actor si no existe
-    	                        if (!actores.containsKey(idActor)) {
+                                // CAMBIO: le pasamos su nombre real (antes ""), 
+                                // necesario para que obtenerActoresOrdenados() ordene bien
+                                Actor actor = new Actor(idActor, nombreActor);
 
-    	                            Actor actor = new Actor(idActor, "");
+                                insertarActor(actor);
+                            }
 
-    	                            insertarActor(actor);
-    	                        }
+                            // Creamos la película si no existe
+                            if (!peliculas.containsKey(idPelicula)) {
 
-    	                        // Creamos la película si no existe
-    	                        if (!peliculas.containsKey(idPelicula)) {
+                                Pelicula pelicula = new Pelicula(
+                                    idPelicula,
+                                    titulo,
+                                    anio
+                                );
 
-    	                            Pelicula pelicula = new Pelicula(
-    	                                idPelicula,
-    	                                titulo,
-    	                                anio
-    	                            );
+                                insertarPelicula(pelicula);
+                            }
 
-    	                            insertarPelicula(pelicula);
-    	                        }
+                            // Relacionamos el actor con la película
+                            relacionarActorPelicula(
+                                idActor,
+                                idPelicula
+                            );
+                        }
+                    }
 
-    	                        // Relacionamos el actor con la película
-    	                        relacionarActorPelicula(
-    	                            idActor,
-    	                            idPelicula
-    	                        );
-    	                    }
-    	                }
+                    lector.close();
 
-    	                lector.close();
+                } catch (FileNotFoundException e) {
 
-    	            } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
-    	                e.printStackTrace();
-    	            }
-    	        }
-    	    }
+        System.out.println("Actores cargados: " + actores.size());
 
-    	    System.out.println("Actores cargados: " + actores.size());
-
-    	    System.out.println("Películas cargadas: " + peliculas.size());
-    	}
+        System.out.println("Películas cargadas: " + peliculas.size());
+    }
     
     public static void main(String[] args) {
 
@@ -204,21 +207,27 @@ public class GestorActoresPeliculas {
 
         gestor.cargarDatos("datos");
 
+        // CAMBIO: id de actor completo (URL de Wikidata), antes solo "Q101080945"
+        String idActor = "http://www.wikidata.org/entity/Q101080945";
+
         // buscar un actor
-        Actor actor = gestor.buscarActor("Q101080945");
+        Actor actor = gestor.buscarActor(idActor);
 
         System.out.println("Actor encontrado: " + actor);
 
-        System.out.println("Películas del actor: "
-                + gestor.obtenerPeliculasActor("Q101080945").size());
+        // CAMBIO: comprobamos que no sea null antes de usar .size()
+        if (gestor.obtenerPeliculasActor(idActor) != null) {
+            System.out.println("Películas del actor: "
+                    + gestor.obtenerPeliculasActor(idActor).size());
+        }
 
         // buscar los actores de una película
         String idPelicula = "http://www.wikidata.org/entity/Q12047846";
 
         System.out.println("Actores de la película: "
                 + gestor.obtenerActoresPelicula(idPelicula).size());
-        
-     // modificamoss el año de estreno
+
+        // modificamos el año de estreno
         System.out.println("Año original: "
                 + gestor.peliculas.get(idPelicula).getAnioEstreno());
 
@@ -226,27 +235,33 @@ public class GestorActoresPeliculas {
 
         System.out.println("Año modificado: "
                 + gestor.peliculas.get(idPelicula).getAnioEstreno());
-        
-     // para borrar un actor
-        gestor.borrarActor("Q101080945");
+
+        // para borrar un actor
+        // CAMBIO: usamos el id completo
+        gestor.borrarActor(idActor);
 
         System.out.println("Actor después de borrar: "
-                + gestor.buscarActor("Q101080945"));
+                + gestor.buscarActor(idActor));
 
         System.out.println("Actores de la película después de borrar: "
                 + gestor.obtenerActoresPelicula(idPelicula).size());
 
         System.out.println("Carga terminada.");
-     // guauardar actores en un fichero
+
+        // guardar actores en un fichero
         gestor.guardarEnFichero("actores_guardados.txt");
 
         System.out.println("Actores guardados correctamente.");
-     //  actores ordenados
+
+        // actores ordenados
         System.out.println("Primeros actores ordenados:");
 
-        for (Actor a : gestor.obtenerActoresOrdenados().subList(0, 10)) {
+        // CAMBIO: Math.min para que no falle si hay menos de 10 actores
+        List<Actor> ordenados = gestor.obtenerActoresOrdenados();
+        for (Actor a : ordenados.subList(0, Math.min(10, ordenados.size()))) {
             System.out.println(a);
         }
     }
+    
 }
 
