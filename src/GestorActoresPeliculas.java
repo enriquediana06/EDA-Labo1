@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.io.File;
+
 public class GestorActoresPeliculas {
 
     private HashMap<String, Actor> actores;
@@ -28,7 +29,7 @@ public class GestorActoresPeliculas {
     public Actor buscarActor(String id) {
         return actores.get(id);
     }
-    
+
     public Set<Pelicula> obtenerPeliculasActor(String idActor) {
 
         Actor actor = actores.get(idActor);
@@ -61,7 +62,7 @@ public class GestorActoresPeliculas {
 
         return null;
     }
-    
+
     public int obtenerAnioPelicula(String idPelicula) {
 
         Pelicula pelicula = peliculas.get(idPelicula);
@@ -81,7 +82,7 @@ public class GestorActoresPeliculas {
             pelicula.setAnioEstreno(nuevoAnio);
         }
     }
-    
+
     public void borrarActor(String idActor) {
 
         Actor actor = actores.get(idActor);
@@ -95,26 +96,29 @@ public class GestorActoresPeliculas {
             actores.remove(idActor);
         }
     }
+
     public void guardarEnFichero(String nombreFichero) {
-    	try {
-    	    PrintWriter escritor = new PrintWriter(nombreFichero);
+        try {
+            PrintWriter escritor = new PrintWriter(nombreFichero);
 
-    	    for (Actor actor : actores.values()) {
-    	        escritor.println(actor);
-    	    }
-    	    escritor.close();
-    	} catch (FileNotFoundException e) {
-    	    e.printStackTrace();
-    	}
+            for (Actor actor : actores.values()) {
+                escritor.println(actor);
+            }
+            escritor.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
-    
-    public List<Actor> obtenerActoresOrdenados() {
-        List<Actor> lista = new ArrayList<>(actores.values()); //una copia pa no modificar la original
 
-        Collections.sort(lista); //ordenamos la copia
+    public List<Actor> obtenerActoresOrdenados() {
+        // copia para no modificar la colección original
+        List<Actor> lista = new ArrayList<>(actores.values());
+
+        Collections.sort(lista);
 
         return lista;
     }
+
     public void cargarDatos(String nombreCarpeta) {
 
         File carpeta = new File(nombreCarpeta);
@@ -148,24 +152,18 @@ public class GestorActoresPeliculas {
 
                         if (datos.length == 4) {
 
-                            // CAMBIO: el id del actor es datos[0] (antes datos[1])
                             String idActor = datos[0];
-                            // NUEVO: el nombre del actor es datos[1]
                             String nombreActor = datos[1];
                             String idPelicula = datos[2];
                             String titulo = datos[3];
 
-                            // Creamos el actor si no existe
                             if (!actores.containsKey(idActor)) {
 
-                                // CAMBIO: le pasamos su nombre real (antes ""), 
-                                // necesario para que obtenerActoresOrdenados() ordene bien
                                 Actor actor = new Actor(idActor, nombreActor);
 
                                 insertarActor(actor);
                             }
 
-                            // Creamos la película si no existe
                             if (!peliculas.containsKey(idPelicula)) {
 
                                 Pelicula pelicula = new Pelicula(
@@ -177,7 +175,6 @@ public class GestorActoresPeliculas {
                                 insertarPelicula(pelicula);
                             }
 
-                            // Relacionamos el actor con la película
                             relacionarActorPelicula(
                                 idActor,
                                 idPelicula
@@ -198,7 +195,7 @@ public class GestorActoresPeliculas {
 
         System.out.println("Películas cargadas: " + peliculas.size());
     }
-    
+
     public static void main(String[] args) {
 
         GestorActoresPeliculas gestor = new GestorActoresPeliculas();
@@ -207,27 +204,22 @@ public class GestorActoresPeliculas {
 
         gestor.cargarDatos("datos");
 
-        // CAMBIO: id de actor completo (URL de Wikidata), antes solo "Q101080945"
         String idActor = "http://www.wikidata.org/entity/Q101080945";
 
-        // buscar un actor
         Actor actor = gestor.buscarActor(idActor);
 
         System.out.println("Actor encontrado: " + actor);
 
-        // CAMBIO: comprobamos que no sea null antes de usar .size()
         if (gestor.obtenerPeliculasActor(idActor) != null) {
             System.out.println("Películas del actor: "
                     + gestor.obtenerPeliculasActor(idActor).size());
         }
 
-        // buscar los actores de una película
         String idPelicula = "http://www.wikidata.org/entity/Q12047846";
 
         System.out.println("Actores de la película: "
                 + gestor.obtenerActoresPelicula(idPelicula).size());
 
-        // modificamos el año de estreno
         System.out.println("Año original: "
                 + gestor.peliculas.get(idPelicula).getAnioEstreno());
 
@@ -236,8 +228,6 @@ public class GestorActoresPeliculas {
         System.out.println("Año modificado: "
                 + gestor.peliculas.get(idPelicula).getAnioEstreno());
 
-        // para borrar un actor
-        // CAMBIO: usamos el id completo
         gestor.borrarActor(idActor);
 
         System.out.println("Actor después de borrar: "
@@ -248,20 +238,16 @@ public class GestorActoresPeliculas {
 
         System.out.println("Carga terminada.");
 
-        // guardar actores en un fichero
         gestor.guardarEnFichero("actores_guardados.txt");
 
         System.out.println("Actores guardados correctamente.");
 
-        // actores ordenados
         System.out.println("Primeros actores ordenados:");
 
-        // CAMBIO: Math.min para que no falle si hay menos de 10 actores
         List<Actor> ordenados = gestor.obtenerActoresOrdenados();
         for (Actor a : ordenados.subList(0, Math.min(10, ordenados.size()))) {
             System.out.println(a);
         }
     }
-    
-}
 
+}

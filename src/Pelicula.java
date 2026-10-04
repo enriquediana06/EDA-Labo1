@@ -35,7 +35,6 @@ public class Pelicula {
         return actores;
     }
 
-    // --- MÉTODOS DE RELACIÓN ---
     public void addActor(Actor a) {
         if (a != null) {
             this.actores.add(a);
@@ -48,7 +47,6 @@ public class Pelicula {
         }
     }
 
-    // --- MÉTODOS EQUALS Y HASHCODE (según los apuntes de Tablas Hash) ---
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
